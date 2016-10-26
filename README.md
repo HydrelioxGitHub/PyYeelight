@@ -44,4 +44,4 @@ Tests are only made with a YLDP03YL model. Because it's the only hardware model 
 
   - PR are welcome
   - Advices on library structure are welcome too, this is one of my first python library and I'm still a noob on Python code
-  - If you want to contact me : <i class="icon-twitter"></i> @hydreliox
+  - If you want to contact me : <i class="icon-twitter"></i> @hydreliox on Twitter
