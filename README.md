@@ -1,4 +1,4 @@
-PyYeelight 
+PyYeelight
 ===================
 
 ![YeelightBulb](http://www.yeelight.com/yeelight2016/i/image/newindex/topic2.png)
@@ -27,13 +27,13 @@ Tests are only made with a YLDP03YL model. Because it's the only hardware model 
 - [ ] Correct some bugs (see TODO in code)
 - [ ] Handle Notifications send by bulb (to discover bulbs and adjust properties
 - [ ] .... and lots of things !
- 
+
 ### <i class="icon-cog"></i> How-To
 
 1. You have to setup your bulb using Yeelight app. ( [Android](https://play.google.com/store/apps/details?id=com.yeelight.cherry&hl=fr), [IOS](https://itunes.apple.com/us/app/yeelight/id977125608?mt=8) ).
 2. In the bulb property, you have to enable "Developer Mode"
 3. Determine your bulb ip (using router, software, ping and so on)
-4. Open your favorite python3 console  
+4. Open your favorite python3 console
 ```
 >>> import pyyeelight
 >>> bulb = pyyeelight.YeelightBulb("192.168.1.25")

@@ -37,7 +37,7 @@ class YeelightBulb:
     ADJUST_PROPERTY_COLOR_TEMPERATURE = "ct"
     ADJUST_PROPERTY_COLOR = "color"
 
-    def __init__(self, ip, port=55443):
+    def __init__(self, ip, port=55443, effect=EFFECT_SUDDEN, transition_time=MIN_TRANSITION_TIME):
         self.api_call = YeelightAPICall(ip, port)
         self.property = dict.fromkeys([self.PROPERTY_NAME_POWER, self.PROPERTY_NAME_BRIGHTNESS,
                                        self.PROPERTY_NAME_COLOR_TEMPERATURE, self.PROPERTY_NAME_RGB_COLOR,
@@ -46,6 +46,8 @@ class YeelightBulb:
                                        self.PROPERTY_NAME_SLEEP_REMAINING, self.PROPERTY_NAME_FLOW_PARAMETERS,
                                        self.PROPERTY_NAME_MUSIC_IS_ON, self.PROPERTY_NAME_BULB_NAME])
         self.refresh_property()
+        self.effect = effect
+        self.transition_time = transition_time
 
     def is_on(self):
         return self.property[self.PROPERTY_NAME_POWER] == self.POWER_ON
@@ -74,7 +76,7 @@ class YeelightBulb:
         for i in range(len(prop_list)):
             self.property[prop_list[i]] = self.api_call.get_response()[i]
 
-    def set_color_temperature(self, temperature, effect=EFFECT_SUDDEN, transition_time=MIN_TRANSITION_TIME):
+    def set_color_temperature(self, temperature, effect=None, transition_time=None):
         """
             Set the white color temperature. The bulb must be switched on.
 
@@ -89,6 +91,10 @@ class YeelightBulb:
         # Check bulb state
         if self.is_off():
             raise Exception("set_color_temperature can't be used if the bulb is off. Turn it on first")
+
+        effect = effect or self.effect
+        transition_time = transition_time or self.transition_time
+
         # Input validation
         schema = Schema({'temperature': All(int, Range(min=1700, max=6500)),
                          'effect': Any(self.EFFECT_SUDDEN, self.EFFECT_SMOOTH),
@@ -100,7 +106,7 @@ class YeelightBulb:
         # Update property
         self.property[self.PROPERTY_NAME_COLOR_TEMPERATURE] = temperature
 
-    def set_rgb_color(self, red, green, blue, effect=EFFECT_SUDDEN, transition_time=MIN_TRANSITION_TIME):
+    def set_rgb_color(self, red, green, blue, effect=None, transition_time=None):
         """
             Set the color of the bulb using rgb code. The bulb must be switched on.
 
@@ -119,6 +125,10 @@ class YeelightBulb:
         # Check bulb state
         if self.is_off():
             raise Exception("set_rgb_color can't be used if the bulb is off. Turn it on first")
+
+        effect = effect or self.effect
+        transition_time = transition_time or self.transition_time
+
         # Input validation
         schema = Schema({'red': All(int, Range(min=0, max=255)),
                          'green': All(int, Range(min=0, max=255)),
@@ -133,7 +143,7 @@ class YeelightBulb:
         # Update property
         self.property[self.PROPERTY_NAME_RGB_COLOR] = rgb
 
-    def set_hsv_color(self, hue, saturation, effect=EFFECT_SUDDEN, transition_time=MIN_TRANSITION_TIME):
+    def set_hsv_color(self, hue, saturation, effect=None, transition_time=None):
         """
             Set the color of the bulb using hsv code. The bulb must be switched on.
             TODO : Resolve bug found trying to set hue to 100 and sat to 100 (General error)
@@ -151,6 +161,10 @@ class YeelightBulb:
         # Check bulb state
         if self.is_off():
             raise Exception("set_hsv_color can't be used if the bulb is off. Turn it on first")
+
+        effect = effect or self.effect
+        transition_time = transition_time or self.transition_time
+
         # Input validation
         schema = Schema({'hue': All(int, Range(min=0, max=359)),
                          'saturation': All(int, Range(min=0, max=100)),
@@ -164,7 +178,7 @@ class YeelightBulb:
         self.property[self.PROPERTY_NAME_HUE] = hue
         self.property[self.PROPERTY_NAME_SATURATION] = saturation
 
-    def set_brightness(self, brightness, effect=EFFECT_SUDDEN, transition_time=MIN_TRANSITION_TIME):
+    def set_brightness(self, brightness, effect=None, transition_time=None):
         """
             This method is used to change the brightness of a smart LED
 
@@ -181,6 +195,10 @@ class YeelightBulb:
         # Check bulb state
         if self.is_off():
             raise Exception("set_brightness can't be used if the bulb is off. Turn it on first")
+
+        effect = effect or self.effect
+        transition_time = transition_time or self.transition_time
+
         # Input validation
         schema = Schema({'brightness': All(int, Range(min=1, max=100)),
                          'effect': Any(self.EFFECT_SUDDEN, self.EFFECT_SMOOTH),
@@ -192,7 +210,7 @@ class YeelightBulb:
         # Update property
         self.property[self.PROPERTY_NAME_BRIGHTNESS] = brightness
 
-    def turn_on(self, effect=EFFECT_SUDDEN, transition_time=MIN_TRANSITION_TIME):
+    def turn_on(self, effect=None, transition_time=None):
         """
             This method is used to switch on the smart LED (software managed on).
 
@@ -206,6 +224,9 @@ class YeelightBulb:
         if self.is_on():
             return
         else:
+            effect = effect or self.effect
+            transition_time = transition_time or self.transition_time
+
             # Input validation
             schema = Schema(
                 {'effect': Any(self.EFFECT_SUDDEN, self.EFFECT_SMOOTH), 'transition_time': All(int, Range(min=30))})
@@ -216,7 +237,7 @@ class YeelightBulb:
             # Update property
             self.property[self.PROPERTY_NAME_POWER] = self.POWER_ON
 
-    def turn_off(self, effect=EFFECT_SUDDEN, transition_time=MIN_TRANSITION_TIME):
+    def turn_off(self, effect=None, transition_time=None):
         """
             This method is used to switch off the smart LED (software managed off).
 
@@ -230,6 +251,9 @@ class YeelightBulb:
         if self.is_off():
             return
         else:
+            effect = effect or self.effect
+            transition_time = transition_time or self.transition_time
+
             # Input validation
             schema = Schema(
                 {'effect': Any(self.EFFECT_SUDDEN, self.EFFECT_SMOOTH), 'transition_time': All(int, Range(min=30))})
