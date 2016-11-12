@@ -47,6 +47,8 @@ class YeelightBulb:
                                        self.PROPERTY_NAME_MUSIC_IS_ON, self.PROPERTY_NAME_BULB_NAME])
         self.refresh_property()
 
+        self.auto_on = False
+
     def is_on(self):
         return self.property[self.PROPERTY_NAME_POWER] == self.POWER_ON
 
@@ -74,6 +76,21 @@ class YeelightBulb:
         for i in range(len(prop_list)):
             self.property[prop_list[i]] = self.api_call.get_response()[i]
 
+    def _ensure_bulb_on(self):
+        """
+            Check if the bulb is off and either throw an exception or turn it
+            on.
+        """
+        if self.is_on():
+            return
+
+        if self.auto_on:
+            # Turn the bulb on suddenly, because we want to take further action
+            # immediately afterwards.
+            self.turn_on(effect=self.EFFECT_SUDDEN)
+        else:
+            raise Exception("Cannot perform action if the bulb is off. Turn it on first.")
+
     def set_color_temperature(self, temperature, effect=EFFECT_SUDDEN, transition_time=MIN_TRANSITION_TIME):
         """
             Set the white color temperature. The bulb must be switched on.
@@ -86,9 +103,8 @@ class YeelightBulb:
             :type effect: str
             :type transition_time : int
         """
-        # Check bulb state
-        if self.is_off():
-            raise Exception("set_color_temperature can't be used if the bulb is off. Turn it on first")
+        self._ensure_bulb_on()
+
         # Input validation
         schema = Schema({'temperature': All(int, Range(min=1700, max=6500)),
                          'effect': Any(self.EFFECT_SUDDEN, self.EFFECT_SMOOTH),
@@ -116,9 +132,8 @@ class YeelightBulb:
             :type effect: str
             :type transition_time : int
         """
-        # Check bulb state
-        if self.is_off():
-            raise Exception("set_rgb_color can't be used if the bulb is off. Turn it on first")
+        self._ensure_bulb_on()
+
         # Input validation
         schema = Schema({'red': All(int, Range(min=0, max=255)),
                          'green': All(int, Range(min=0, max=255)),
@@ -148,9 +163,8 @@ class YeelightBulb:
             :type effect: str
             :type transition_time : int
         """
-        # Check bulb state
-        if self.is_off():
-            raise Exception("set_hsv_color can't be used if the bulb is off. Turn it on first")
+        self._ensure_bulb_on()
+
         # Input validation
         schema = Schema({'hue': All(int, Range(min=0, max=359)),
                          'saturation': All(int, Range(min=0, max=100)),
@@ -178,9 +192,8 @@ class YeelightBulb:
             :type effect: str
             :type transition_time : int
         """
-        # Check bulb state
-        if self.is_off():
-            raise Exception("set_brightness can't be used if the bulb is off. Turn it on first")
+        self._ensure_bulb_on()
+
         # Input validation
         schema = Schema({'brightness': All(int, Range(min=1, max=100)),
                          'effect': Any(self.EFFECT_SUDDEN, self.EFFECT_SMOOTH),
@@ -264,9 +277,8 @@ class YeelightBulb:
 
             Only accepted if the smart LED is currently in "on" state.
         """
-        # Check bulb state
-        if self.is_off():
-            raise Exception("save_state can't be used if the bulb is off. Turn it on first")
+        self._ensure_bulb_on()
+
         # Send command
         self.api_call.operate_on_bulb("set_default")
 
